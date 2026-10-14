@@ -69,3 +69,27 @@ The `index.html` file loads Turnstile in explicit-render mode. The React registr
 - Concurrent assignment of overlapping programmes must fail.
 - Completion report can only be submitted once and only by the assigned facilitator or manager.
 - Coordinators must test date/time around the UK BST→GMT switch on 25 Oct 2026.
+
+
+## v0.2 — Programmes and reporting (October 2026)
+
+- Added administrator/coordinator **Programmes** tab: consolidated scheduled and unassigned requests, area/postcode/facilitator search, status and type filters, optional grouping by programme day, CSV export, and shortcut back to the existing assignment form.
+- Expanded **Reports** tab: campaign date filters, programme-type and facilitator filters (management roles only), accurate totals from completed programmes with submitted reports, counts by type/town/facilitator, itemised report table, CSV export. Facilitator report views restrict to their own programmes in the UI.
+- Fixed registration query ordering to use `submitted_at` rather than the nonexistent `registrations.created_at`.
+- The facilitator choice dropdown now lists active facilitator profiles rather than all staff.
+- No SQL migration required; existing `registrations`, `programs`, `program_reports` and `profiles` are used.
+
+### Deploy and test
+
+1. Back up your live repository. Copy the updated project contents to your local Git checkout (do not overwrite `.env` or `.git`). Commit and push to `main`, then monitor Railway's GitHub deployment.
+2. Ensure your Railway project has `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` configured at build time.
+3. Sign in as an administrator. Check **Programmes**: unassigned requests should be visible alongside assigned and completed ones. Test searching, filters and export.
+4. Check **Reports**: your completed test record should appear as 1 report, 20 participants, 20 lamps, 5 books with default dates. Test filters and CSV export.
+5. Sign in as a facilitator; ensure **Programmes** tab is not accessible and only authorised data is shown. Check Supabase RLS policies independently before public launch.
+
+### Known limitations
+
+- The current `load()` fetches at most 1,000 registrations, and uses client-side joins/filters. Add paginated/server-side aggregates before substantial scale.
+- Group-by-day is not a full calendar grid. Editing assignments is performed in the existing Registrations panel.
+- Facilitator-by-area statistics currently group by host `city`, not postcode boundaries or `areas` mapping.
+- This release has been JSX syntax-checked. Package installation and a full Vite production build could not be completed in the build environment, so verify `npm ci`/`npm install` and `npm run build` locally before pushing.
