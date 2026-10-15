@@ -52,6 +52,22 @@ function SummaryTable({ title, rows, filename, download = true }) {
     </table></div> : <p className="muted">No completed reports match the selected filters.</p>}
   </section>;
 }
+
+function BarChart({title, rows, metric='count', limit=12}) {
+  const data = [...rows].sort((a,b)=>b[metric]-a[metric] || a.key.localeCompare(b.key,'en-GB')).slice(0,limit);
+  const max = Math.max(1,...data.map(row=>number(row[metric])));
+  return <section className="report-chart" aria-label={title}>
+    <h3>{title}</h3>
+    {data.length ? <div className="report-chart-list">{data.map(row=><div className="report-chart-item" key={row.key}>
+      <span className="report-chart-label" title={row.key}>{displayKey(title==='Daily programmes'?'Daily outreach':title==='Programmes by type'?'By programme type':'Group',row.key)}</span>
+      <div className="report-chart-track" role="img" aria-label={row.key+': '+number(row[metric])}>
+        <div className="report-chart-bar" style={{width:(number(row[metric])/max*100)+'%'}}/>
+      </div>
+      <strong>{number(row[metric]).toLocaleString('en-GB')}</strong>
+    </div>)}</div> : <p className="muted">No completed programmes in this selection.</p>}
+  </section>;
+}
+
 export default function AdvancedReports({ rows, canManage, start, end }) {
   const [search, setSearch] = React.useState('');
   const filtered = rows.filter(x => [x.registration.reference,x.registration.city,x.registration.postcode,x.facilitator,x.registration.program_type].join(' ').toLowerCase().includes(search.trim().toLowerCase()));
@@ -67,6 +83,14 @@ export default function AdvancedReports({ rows, canManage, start, end }) {
     </div>
     <label className="report-v05-search">Search reports <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Reference, town, postcode, facilitator or type"/></label>
     <div className="report-summary">{[['Programmes',total.count],['Participants',total.participants],['Lamps',total.lamps],['Books',total.books]].map(([label,value])=><div key={label}><b>{value.toLocaleString('en-GB')}</b><span>{label}</span></div>)}</div>
+    <div className="report-charts">
+      <BarChart title="Daily programmes" rows={daily}/>
+      {canManage && <>
+        <BarChart title="Programmes by postcode" rows={areas}/>
+        <BarChart title="Programmes by facilitator" rows={facilitators}/>
+        <BarChart title="Programmes by type" rows={types}/>
+      </>}
+    </div>
     <SummaryTable title="Daily outreach" rows={daily} filename="damodara-daily-report.csv" download={canManage}/>
     {canManage && <>
       <SummaryTable title="By postcode district" rows={areas} filename="damodara-postcode-report.csv"/>
