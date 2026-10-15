@@ -93,3 +93,38 @@ The `index.html` file loads Turnstile in explicit-render mode. The React registr
 - Group-by-day is not a full calendar grid. Editing assignments is performed in the existing Registrations panel.
 - Facilitator-by-area statistics currently group by host `city`, not postcode boundaries or `areas` mapping.
 - This release has been JSX syntax-checked. Package installation and a full Vite production build could not be completed in the build environment, so verify `npm ci`/`npm install` and `npm run build` locally before pushing.
+
+## v0.3 — Facilitator, area and availability management (14 October 2026)
+
+This release adds an **admin/coordinator Facilitators tab** with facilitator status, coverage area toggles, available dates, and a form for administrators to add coverage areas. Administrators can provision approved facilitator accounts from the UI using a temporary password. **Never publish the temporary password or commit it to Git.** Staff should use a trusted, private channel for initial credentials; add a self-service password-change/recovery screen and custom SMTP before broad launch.
+
+### Required production migration (before pushing v0.3)
+
+Apply `supabase/migrations/202610140002_facilitator_management.sql` once to the existing Supabase project via SQL Editor. This adds only four role-validated RPCs. Do **not** rerun `202610140001_initial.sql` against your live project. Take a database backup first.
+
+### Required Edge Function
+
+Deploy `supabase/functions/create-facilitator/index.ts` as **`create-facilitator`**. Unlike `submit-registration`, this endpoint **MUST have JWT verification enabled**. It checks the caller's user token and verifies their `profiles.role` is `admin`. Set its `ALLOWED_ORIGIN` to `https://damodara-production.up.railway.app`; Supabase-managed `SUPABASE_URL`, `SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY` must be available to it. Never expose a service-role key to Railway's Vite frontend variables.
+
+### Local test before GitHub push
+
+```powershell
+npm install
+npm run build
+```
+
+Then commit/push the new `src`, migration and function files. Railway will deploy the frontend automatically, but deploying the Supabase Edge Function and migration is a separate step.
+
+### Acceptance tests
+
+1. Admin signs in and sees `Facilitators`; facilitator does not see admin management tab.
+2. Admin creates a facilitator using a verified email and initial password (at least 12 characters). The new account can sign in; it is recorded in `profiles` as `facilitator`.
+3. Admin enables and disables a coverage area; reload confirms persistence.
+4. Admin adds a valid non-overlapping availability slot in the campaign date range. Duplicate/overlapping slot is rejected. Deletion persists.
+5. Admin deactivates a facilitator; they disappear from assignment dropdown on reload.
+6. Existing public registration, programme assignment, completed reporting, dates and Unicode content remain functional.
+7. A non-admin attempt to call `create-facilitator` is rejected, and non-manager cannot alter someone else's coverage.
+
+### Limitations of v0.3
+
+Area/postcode coverage and availability are captured for coordination, but the existing assignment RPC does not yet require a matching availability slot or postcode. A separate scheduling-hardening release should implement travel buffers, availability-based candidate ranking, and stricter assignment validation. The existing completed-programme conflict policy also requires business confirmation for same-day schedule reuse. Email invitations and password recovery require dedicated approved delivery and UI, not the project’s basic Supabase email allowance.
