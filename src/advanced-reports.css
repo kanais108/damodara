@@ -42,3 +42,54 @@
   body:has(#damodara-print-report) #damodara-print-report .report-v05-block {break-inside:avoid}
   body:has(#damodara-print-report) #damodara-print-report .report-charts {break-inside:avoid}
 }
+
+/* v0.5.5 Option C: warm devotional, professional impact report */
+.report-impact{padding:17px;border-radius:16px;background:linear-gradient(115deg,#78402e 0%,#95522c 64%,#b8793b 100%);color:#fff8ec}
+.report-impact-intro{margin-bottom:14px}
+.report-impact-eyebrow{font-size:10px;font-weight:800;letter-spacing:.16em;color:#ffe0a1}
+.report-impact h3{color:#fff!important;margin:6px 0!important;font-size:1.25rem}
+.report-impact p{margin:0;font-size:12px;color:#f9dec2}
+.report-v05 .report-impact .report-summary{margin:14px 0 0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px}
+.report-summary-card{position:relative;border:1px solid #eddbc4;border-radius:12px;padding:15px 12px;background:#fff9f0;box-shadow:0 3px 12px #3e29100a;min-width:0}
+.report-summary-card .impact-icon{display:block;font-size:20px;margin-bottom:6px}
+.report-summary-card b{display:block;font-size:1.75rem;line-height:1.2;font-variant-numeric:tabular-nums;color:#3d3027;margin-bottom:5px}
+.report-summary-card>span:last-child{font-size:12px;font-weight:650;color:#6e5b4b}
+.impact-programmes{background:#ffebd4}.impact-participants{background:#dff2f0}.impact-lamps{background:#fff0c6}.impact-books{background:#eee4f8}
+.report-chart{border-radius:15px;padding:18px;box-shadow:0 4px 14px #4d2d1f0b}
+.report-chart h3{display:flex;align-items:center;gap:8px;color:#4d2d1f;font-size:1.02rem}
+.report-chart-icon{font-size:1.2rem;line-height:1}
+.report-chart-track{border-radius:12px;height:17px;background:#f1eae0}
+.report-chart-bar{border-radius:12px;min-width:3px}
+.report-chart-label{font-weight:600;color:#57463d}
+.theme-daily{background:linear-gradient(180deg,#fff8ee,#fff);border-color:#e9d0af}
+.theme-daily .report-chart-bar{background:linear-gradient(90deg,#b45d21,#efa941)}
+.theme-postcode{background:linear-gradient(180deg,#f1faf9,#fff);border-color:#cfe4e2}
+.theme-postcode .report-chart-bar{background:linear-gradient(90deg,#277f88,#6bb9b3)}
+.theme-facilitator{background:linear-gradient(180deg,#fcf3f0,#fff);border-color:#ebd1cb}
+.theme-facilitator .report-chart-bar{background:linear-gradient(90deg,#904839,#c98268)}
+.theme-type{background:linear-gradient(180deg,#faf4fc,#fff);border-color:#e1d1e9}
+.theme-type .report-chart-bar{background:linear-gradient(90deg,#7b4a9a,#b784ce)}
+.report-donut-layout{display:grid;grid-template-columns:130px 1fr;align-items:center;gap:16px}
+.report-donut{width:130px;height:130px;aspect-ratio:1;border-radius:50%;display:grid;place-items:center}
+.report-donut-centre{background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:50%;width:82px;height:82px;box-shadow:0 1px 5px #0000000c}
+.report-donut-centre strong{font-size:23px;color:#4d2d1f}
+.report-donut-centre small{font-size:11px;color:#786778}
+.report-donut-legend{display:grid;gap:8px;min-width:0}
+.report-donut-legend-row{display:grid;grid-template-columns:10px minmax(0,1fr) auto;align-items:center;gap:8px;font-size:12px}
+.report-donut-dot{height:9px;width:9px;border-radius:50%}
+.report-donut-legend-row strong{font-variant-numeric:tabular-nums}
+@media(max-width:850px){.report-v05 .report-impact .report-summary{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:420px){.report-donut-layout{grid-template-columns:1fr;justify-items:center}.report-donut-legend{width:100%}}
+@media print{
+ .report-v05 .report-impact{padding:12px;background:#fff!important;color:#1f1f1f!important;border:1px solid #d1b18d}
+ .report-v05 .report-impact h3,.report-v05 .report-impact p,.report-v05 .report-impact-eyebrow{color:#222!important}
+ .report-v05 .report-impact .report-summary{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:6px}
+ .report-summary-card{padding:7px;box-shadow:none;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+ .report-summary-card b{font-size:17px}
+ .report-summary-card .impact-icon{font-size:13px;margin-bottom:2px}
+ .report-chart{padding:10px;box-shadow:none;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+ .report-donut{print-color-adjust:exact;-webkit-print-color-adjust:exact}
+ .report-donut-layout{grid-template-columns:100px 1fr;gap:9px}
+ .report-donut{height:100px;width:100px}
+ .report-donut-centre{height:62px;width:62px}
+}
