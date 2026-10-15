@@ -53,18 +53,48 @@ function SummaryTable({ title, rows, filename, download = true }) {
   </section>;
 }
 
-function BarChart({title, rows, metric='count', limit=12}) {
-  const data = [...rows].sort((a,b)=>b[metric]-a[metric] || a.key.localeCompare(b.key,'en-GB')).slice(0,limit);
-  const max = Math.max(1,...data.map(row=>number(row[metric])));
-  return <section className="report-chart" aria-label={title}>
-    <h3>{title}</h3>
-    {data.length ? <div className="report-chart-list">{data.map(row=><div className="report-chart-item" key={row.key}>
+const chartThemes = {
+  'Daily programmes': { icon:'📅', className:'theme-daily', label:'Daily programmes' },
+  'Programmes by postcode': { icon:'📍', className:'theme-postcode', label:'Postcode outreach' },
+  'Programmes by facilitator': { icon:'🤝', className:'theme-facilitator', label:'Facilitator contributions' },
+  'Programmes by type': { icon:'🪔', className:'theme-type', label:'Programme types' }
+};
+function BarChart({title,rows,metric='count',limit=12}){
+  const meta=chartThemes[title]||{icon:'📊',className:'theme-daily',label:title};
+  const data=[...rows].sort((a,b)=>b[metric]-a[metric]||a.key.localeCompare(b.key,'en-GB')).slice(0,limit);
+  const max=Math.max(1,...data.map(row=>number(row[metric])));
+  return <section className={'report-chart '+meta.className} aria-label={title}>
+    <h3><span className="report-chart-icon" aria-hidden="true">{meta.icon}</span>{meta.label}</h3>
+    {data.length?<div className="report-chart-list">{data.map((row,i)=><div className="report-chart-item" key={row.key}>
       <span className="report-chart-label" title={row.key}>{displayKey(title==='Daily programmes'?'Daily outreach':title==='Programmes by type'?'By programme type':'Group',row.key)}</span>
-      <div className="report-chart-track" role="img" aria-label={row.key+': '+number(row[metric])}>
+      <div className="report-chart-track" role="img" aria-label={row.key+': '+number(row[metric])+' programmes'}>
         <div className="report-chart-bar" style={{width:(number(row[metric])/max*100)+'%'}}/>
       </div>
       <strong>{number(row[metric]).toLocaleString('en-GB')}</strong>
-    </div>)}</div> : <p className="muted">No completed programmes in this selection.</p>}
+    </div>)}</div>:<p className="muted">No completed programmes in this selection.</p>}
+  </section>;
+}
+const typePalette=['#9959A8','#D99A39','#277F88','#A95A40','#658047'];
+function TypeDonut({rows}){
+  const ordered=[...rows].sort((a,b)=>b.count-a.count);
+  const total=ordered.reduce((sum,row)=>sum+row.count,0);
+  let acc=0;
+  const stops=ordered.map((item,i)=>{
+    const start=acc;
+    acc+=item.count/Math.max(1,total)*100;
+    return typePalette[i%typePalette.length]+' '+start+'% '+acc+'%';
+  });
+  return <section className="report-chart theme-type report-donut-card" aria-label="Programme type distribution">
+    <h3><span className="report-chart-icon" aria-hidden="true">🏠</span>Programme type mix</h3>
+    <div className="report-donut-layout">
+      <div className="report-donut" role="img" aria-label={total+' completed programmes by type'} style={{background:total?'conic-gradient('+stops.join(',')+')':'#E6DAEB'}}>
+        <div className="report-donut-centre"><strong>{total.toLocaleString('en-GB')}</strong><small>Total</small></div>
+      </div>
+      <div className="report-donut-legend">{ordered.map((item,i)=><div key={item.key} className="report-donut-legend-row">
+        <span className="report-donut-dot" style={{background:typePalette[i%typePalette.length]}}/>
+        <span>{names[item.key]||item.key}</span><strong>{item.count}</strong>
+      </div>)}{!ordered.length&&<p className="muted">No completed programmes yet.</p>}</div>
+    </div>
   </section>;
 }
 
@@ -82,13 +112,13 @@ export default function AdvancedReports({ rows, canManage, start, end }) {
       {canManage && <button type="button" className="secondary" onClick={() => window.print()}>Print / Save PDF</button>}
     </div>
     <label className="report-v05-search">Search reports <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Reference, town, postcode, facilitator or type"/></label>
-    <div className="report-summary">{[['Programmes',total.count],['Participants',total.participants],['Lamps',total.lamps],['Books',total.books]].map(([label,value])=><div key={label}><b>{value.toLocaleString('en-GB')}</b><span>{label}</span></div>)}</div>
+    <div className="report-impact"><div className="report-impact-intro"><span className="report-impact-eyebrow">KĀRTIK OUTREACH · IMPACT SNAPSHOT</span><h3>Every lamp tells a story</h3><p>Outreach totals from completed programme reports in the selected period.</p></div><div className="report-summary">{[['Programmes',total.count,'📅','impact-programmes'],['Participants',total.participants,'👥','impact-participants'],['Lamps offered',total.lamps,'🪔','impact-lamps'],['Books distributed',total.books,'📚','impact-books']].map(([label,value,icon,theme])=><div key={label} className={'report-summary-card '+theme}><span className="impact-icon" aria-hidden="true">{icon}</span><b>{value.toLocaleString('en-GB')}</b><span>{label}</span></div>)}</div></div>
     <div className="report-charts">
       <BarChart title="Daily programmes" rows={daily}/>
       {canManage && <>
         <BarChart title="Programmes by postcode" rows={areas}/>
         <BarChart title="Programmes by facilitator" rows={facilitators}/>
-        <BarChart title="Programmes by type" rows={types}/>
+        <TypeDonut rows={types}/>
       </>}
     </div>
     <SummaryTable title="Daily outreach" rows={daily} filename="damodara-daily-report.csv" download={canManage}/>
