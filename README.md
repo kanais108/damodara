@@ -128,3 +128,38 @@ Then commit/push the new `src`, migration and function files. Railway will deplo
 ### Limitations of v0.3
 
 Area/postcode coverage and availability are captured for coordination, but the existing assignment RPC does not yet require a matching availability slot or postcode. A separate scheduling-hardening release should implement travel buffers, availability-based candidate ranking, and stricter assignment validation. The existing completed-programme conflict policy also requires business confirmation for same-day schedule reuse. Email invitations and password recovery require dedicated approved delivery and UI, not the project’s basic Supabase email allowance.
+
+## v0.4 — Smart scheduling (ISKCON Reading)
+
+**Deployment order:** back up Supabase; run `supabase/migrations/202610150003_smart_scheduling.sql` in SQL Editor; deploy the frontend from this version to Railway. Keep migrations 001/002 in history; do not rerun them.
+
+### Behaviour
+- Active facilitator **role** required, and a recorded availability interval must cover the entire one-hour programme. No availability means assignment is blocked.
+- Default **30-minute separation** between consecutive programmes of a facilitator. It is enforced inside `assign_program` using a transaction-level advisory lock to block simultaneous conflicting assignments, regardless of the frontend. Completed appointments still occupy their historical slot; cancelled ones do not.
+- A reassignment/reschedule uses the original `assign_program` RPC with the same registration ID. Completed/cancelled registrations cannot be rescheduled. Rescheduling a confirmed programme resets it to `assigned` pending reconfirmation.
+- Postcode match is a **suggestion** based on currently configured outward district prefixes such as `RG1` or `RG6`; it is not a precise distance/geocoding calculation. Coordinators should check travel routing themselves.
+- Weekly calendar shows registered programme requests in a seven-day view. Until assigned, the date/time shown is the **host's requested slot**, not a confirmed booking. Workload count is based on persisted programme records.
+- Date/time inputs and stored `time` fields are in **Europe/London local clock time** for 2026. Do not infer timezone offsets in browser code. The scheduling RPC rejects slots extending into the next day. The UK daylight transition is 25 Oct 2026: do not schedule an ambiguous overnight slot without a design for timezone-aware timestamps.
+
+### Manual test plan (with throwaway host and facilitator accounts)
+1. Verify v0.3 public registration, role-based login, facilitator creation, coverage/availability and completion reporting remain available.
+2. Create availability 18:00–22:00 on a campaign date. Assign programme 18:00–19:00. Attempt another at 19:15: RPC must reject; at 19:30 it should be allowed.
+3. Attempt assignment outside availability and with a deactivated facilitator: both must be rejected, including direct RPC calls.
+4. Assign a matching-postcode facilitator and verify it ranks above a nonmatching facilitator when both are available.
+5. Open weekly calendar, move previous/next week, filter by facilitator, open a request from a calendar entry, and reschedule. Verify in `programs` and `audit_log`.
+6. Confirm a completed programme cannot be rescheduled; check completed report totals are unchanged.
+7. Test two simultaneous assignments to the same facilitator/time from two browsers; at most one succeeds.
+
+### Build and deployment
+
+```powershell
+npm install
+npm run build
+git status
+git add src/main.jsx src/style.css README.md supabase/migrations/202610150003_smart_scheduling.sql
+git commit -m "Add smart scheduling and weekly calendar v0.4"
+git pull --rebase origin main
+git push origin main
+```
+
+If Git reports merge conflicts, **stop** and reconcile changes rather than using force-push. If you previously edited `src/main.jsx` directly in GitHub, inspect the diff carefully to preserve any production-only changes.
