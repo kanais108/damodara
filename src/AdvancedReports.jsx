@@ -76,9 +76,9 @@ export default function AdvancedReports({ rows, canManage, start, end }) {
   const facilitators = aggregate(filtered, x => x.facilitator || 'Unassigned');
   const types = aggregate(filtered, x => x.registration.program_type);
   const total = aggregate(filtered, () => 'Campaign total')[0] || { count: 0, participants: 0, lamps: 0, books: 0 };
-  return <div className="report-v05">
+  return <div className="report-v05" id="damodara-print-report">
     <div className="report-v05-heading">
-      <div><h2>Dāmodara Outreach Report</h2><p className="muted">ISKCON Reading · {prettyDate(start)} – {prettyDate(end)} · Completed programmes only</p></div>
+      <div><div className="report-print-identity">ISKCON READING · UNITED KINGDOM</div><h2>Dāmodara Outreach Report 2026</h2><p className="muted">ISKCON Reading · {prettyDate(start)} – {prettyDate(end)} · Completed programmes only</p><p className="report-generated">Generated {new Intl.DateTimeFormat('en-GB',{dateStyle:'medium',timeStyle:'short',timeZone:'Europe/London'}).format(new Date())} (UK time)</p></div>
       {canManage && <button type="button" className="secondary" onClick={() => window.print()}>Print / Save PDF</button>}
     </div>
     <label className="report-v05-search">Search reports <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Reference, town, postcode, facilitator or type"/></label>
