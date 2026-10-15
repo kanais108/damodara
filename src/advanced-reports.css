@@ -16,3 +16,29 @@
 .report-chart-item strong{text-align:right}
 @media(max-width:780px){.report-charts{grid-template-columns:1fr}.report-chart-item{grid-template-columns:minmax(75px,120px) minmax(0,1fr) 35px}}
 @media print{.report-charts{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.report-chart{padding:8px}.report-chart-item{grid-template-columns:110px minmax(0,1fr) 32px;gap:5px}.report-chart-track{print-color-adjust:exact;-webkit-print-color-adjust:exact}.report-chart-bar{print-color-adjust:exact;-webkit-print-color-adjust:exact}}
+
+
+/* v0.5.3 leadership-report printing */
+.report-print-identity{font-size:11px;font-weight:800;letter-spacing:.16em;color:#8d4d25;margin-bottom:6px}
+.report-generated{font-size:12px;color:#766859;margin-top:4px}
+@media print {
+  @page { size:A4 portrait; margin:13mm 12mm; }
+  body:has(#damodara-print-report) header,
+  body:has(#damodara-print-report) footer,
+  body:has(#damodara-print-report) .dashboard>.dash-title,
+  body:has(#damodara-print-report) .dashboard>.stat-grid,
+  body:has(#damodara-print-report) .dashboard>.tabbar,
+  body:has(#damodara-print-report) .dashboard>.notice,
+  body:has(#damodara-print-report) .dashboard-section>.section-heading,
+  body:has(#damodara-print-report) .dashboard-section>.program-filter,
+  body:has(#damodara-print-report) .dashboard-section>.report-summary,
+  body:has(#damodara-print-report) .dashboard-section>.card,
+  body:has(#damodara-print-report) .dashboard-section>.insight-grid {display:none!important}
+  body:has(#damodara-print-report) .dashboard {padding:0!important;margin:0!important;width:100%!important;max-width:none!important}
+  body:has(#damodara-print-report) .dashboard-section{padding:0!important;margin:0!important}
+  body:has(#damodara-print-report) #damodara-print-report{display:block!important;margin:0!important;width:100%!important}
+  body:has(#damodara-print-report) #damodara-print-report>.report-v05-heading {break-after:avoid}
+  body:has(#damodara-print-report) #damodara-print-report .report-print-identity {color:#222}
+  body:has(#damodara-print-report) #damodara-print-report .report-v05-block {break-inside:avoid}
+  body:has(#damodara-print-report) #damodara-print-report .report-charts {break-inside:avoid}
+}
