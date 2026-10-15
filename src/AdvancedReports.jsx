@@ -1,4 +1,5 @@
 import React from 'react';
+import './advanced-reports.css';
 
 const number = value => Number(value || 0);
 const district = postcode => {
