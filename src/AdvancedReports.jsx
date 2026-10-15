@@ -2,6 +2,12 @@ import React from 'react';
 import './advanced-reports.css';
 
 const number = value => Number(value || 0);
+const prettyDate = date => {
+  if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(String(date))) return date;
+  return new Intl.DateTimeFormat('en-GB', {day:'numeric',month:'short',year:'numeric',timeZone:'UTC'}).format(new Date(date+'T12:00:00Z'));
+};
+const names = {home:'Home',hall:'Hall',street:'High Street',other:'Other'};
+const displayKey = (title,key) => title==='Daily outreach' ? prettyDate(key) : title==='By programme type' ? (names[key]||key) : key;
 const district = postcode => {
   const text = String(postcode || '').trim().toUpperCase().replace(/\s+/g, ' ');
   return text.split(' ')[0] || 'Not provided';
@@ -42,7 +48,7 @@ function SummaryTable({ title, rows, filename, download = true }) {
     <div className="report-v05-heading"><h3>{title}</h3>{download && <button className="secondary" type="button" onClick={() => exportSummary(filename, rows)}>Export CSV</button>}</div>
     {rows.length ? <div className="table-scroll"><table className="data-table">
       <thead><tr><th>{title === 'Daily outreach' ? 'Date' : 'Group'}</th><th>Programmes</th><th>Participants</th><th>Lamps</th><th>Books</th></tr></thead>
-      <tbody>{rows.map(x => <tr key={x.key}><td>{x.key}</td><td>{x.count}</td><td>{x.participants}</td><td>{x.lamps}</td><td>{x.books}</td></tr>)}</tbody>
+      <tbody>{rows.map(x => <tr key={x.key}><td>{displayKey(title,x.key)}</td><td>{x.count}</td><td>{x.participants}</td><td>{x.lamps}</td><td>{x.books}</td></tr>)}</tbody>
     </table></div> : <p className="muted">No completed reports match the selected filters.</p>}
   </section>;
 }
@@ -56,7 +62,7 @@ export default function AdvancedReports({ rows, canManage, start, end }) {
   const total = aggregate(filtered, () => 'Campaign total')[0] || { count: 0, participants: 0, lamps: 0, books: 0 };
   return <div className="report-v05">
     <div className="report-v05-heading">
-      <div><h2>Detailed outreach analysis</h2><p className="muted">ISKCON Reading · {start} to {end} · Only completed programmes with submitted reports</p></div>
+      <div><h2>Dāmodara Outreach Report</h2><p className="muted">ISKCON Reading · {prettyDate(start)} – {prettyDate(end)} · Completed programmes only</p></div>
       {canManage && <button type="button" className="secondary" onClick={() => window.print()}>Print / Save PDF</button>}
     </div>
     <label className="report-v05-search">Search reports <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Reference, town, postcode, facilitator or type"/></label>
@@ -67,6 +73,6 @@ export default function AdvancedReports({ rows, canManage, start, end }) {
       <SummaryTable title="By facilitator" rows={facilitators} filename="damodara-facilitator-report.csv"/>
       <SummaryTable title="By programme type" rows={types} filename="damodara-programme-types.csv"/>
     </>}
-    <p className="muted report-v05-note">Figures represent the records loaded by the dashboard. Check database pagination and reconcile totals before using this as an official campaign-wide report. Test registrations should be excluded from official figures.</p>
+    <p className="muted report-v05-note">Reporting includes submitted completion reports visible to this user. Exclude test programmes before preparing an official ISKCON Reading summary.</p>
   </div>;
 }
